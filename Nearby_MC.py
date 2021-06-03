@@ -1,34 +1,38 @@
-from Parallel_MonteCarlo import Monte_carlo_parallel_apply
+from Parallel_MonteCarlo import maxPath_MonteCarlo
 from utils import *
 import multiprocessing as mp
 import sqlite3
 import time
 import datetime
+from tqdm import tqdm
 
 
 if __name__ == "__main__":
+    CATEGORY_TABLE = "SG_2"  # Table corresponding to the category we will create a graph for
     RUNS = 1000   # Monte Carlo simulations
     THRESHOLD = 0.01   # Threshold of Monte Carlo algorithm
     SUBGRAPH_SIZE = 10000
-    MAX_PATH_LENGTH = 3   # The maximum distance from the source node that a user can be and be considered to be in the
-                          # source nodes reachable set.
+    # The maximum distance from the source node that a user can be and be considered to be in the
+    # source nodes reachable set.
+    MAX_PATH_LENGTH = 10
 
+    pbar = tqdm(total=10)
     def collect_result(result):
         global results
+        global pbar
         results.append(result)
+        pbar.update()
 
     # ====================================================================================================== #
     # Create the graphs
     # ====================================================================================================== #
     SGdb = sqlite3.connect('C:/Users/gauss/Downloads/SG_2.db', uri=True)
-    table_of_category = "SG_1"  # Table corresponding to the category we will create a graph for
     # Create main graph
-    MainGraph = get_graph(table_of_category, SGdb)
+    MainGraph = get_graph(CATEGORY_TABLE, SGdb)
     SGdb.close()
-    # Get sup graph
+    # Get subgraph
     supgraph = get_supgraph2(MainGraph, supgraph_size=SUBGRAPH_SIZE)
-    # Get the edges with the weights of the subgraph
-    # edges_weights = [(user1, user2, puvi) for (user1, user2, puvi) in supgraph.edges.data('weight')]
+
     # Create users list here for faster iteration later
     users_in_graph = [uid for uid in supgraph.nodes]
 
@@ -41,48 +45,40 @@ if __name__ == "__main__":
     print("Starting at: ", datetime.datetime.now())
     # start_time = time.time()  # To count the total time
 
+    # ************************************************************** #
+    # Transfer the Graph from Networkx to dictionaries to be passed
+    # on the Monte_carlo_parallel function. That is necessary as a
+    # result of the way the multiprocessing module works
+    # ************************************************************** #
     # Adjacency list of the sup graph
     dict_subgraph = {}
-    for node in supgraph.nodes():
+    for node in users_in_graph:
         dict_subgraph[node] = list(supgraph.neighbors(node))
 
     dict_puvi = {}
-    for user1 in supgraph.nodes():
+    for user1 in users_in_graph:
         dict_puvi[user1] = {}
         for user2 in supgraph[user1]:
             dict_puvi[user1][user2] = supgraph[user1][user2]['weight']
 
-    # # For each user create a smaller set in which to run the Monte Carlo algorithm
-    # print("Calculating nearby sets ... ", end=" ")
-    # nearby_graph_start_time = time.time()
-    # surrounding_graph = {}   # Keys: user_id, values: the nodes near that user
-    # for source_user in users_in_graph:
-    #     # the nodes close to the source_user
-    #     visited = near_reachable_nodes(dict_subgraph, source_user, max_path_length=MAX_PATH_LENGTH)
-    #     # Create the subgraph with the nodes close the the source_user
-    #     users_subgraph = supgraph.subgraph(visited)
-    #     # Get the edges and the weights (probabilities of influence: "puvi")
-    #     near_edges_weights = [(user1, user2, puvi) for (user1, user2, puvi) in users_subgraph.edges.data('weight')]
-    #     surrounding_graph[source_user] = near_edges_weights
-
-    # nearby_graph_end_time = time.time()
-    # print("Finish after: {m} min".format(m = (nearby_graph_end_time-nearby_graph_start_time)/60))
 
     start_time = time.time()
     print("Running Monte Carlo...", end=" ")
 
     pool = mp.Pool(mp.cpu_count())
 
-    #results = []
-    #for user in users_in_graph:
-    #    pool.apply_async(Monte_carlo_parallel_apply, args=(user, RUNS, supgraph, dict_subgraph, RUNS*THRESHOLD, MAX_PATH_LENGTH), callback = collect_result)
+    prob_threshold = RUNS * THRESHOLD
+
+    results = []
+    for user in users_in_graph:
+        pool.apply_async(maxPath_MonteCarlo, args=(user, RUNS, dict_puvi, dict_subgraph, prob_threshold, MAX_PATH_LENGTH), callback = collect_result)
 
     # -----> Using starmap_async
-    prob_threshold = RUNS*THRESHOLD
-    results = pool.starmap_async(Monte_carlo_parallel_apply, [(user, RUNS, dict_puvi, dict_subgraph, prob_threshold, MAX_PATH_LENGTH) for user in users_in_graph]).get()
+    # prob_threshold = RUNS*THRESHOLD
+    # results = pool.starmap_async(Monte_carlo_parallel_apply, [(user, RUNS, dict_puvi, dict_subgraph, prob_threshold, MAX_PATH_LENGTH) for user in users_in_graph]).get()
 
     pool.close()
-    # pool.join()
+    pool.join()
 
     end_time = time.time()
 
@@ -107,7 +103,6 @@ if __name__ == "__main__":
     for res in results:
         user = res[0]
         RS = res[1]
-        # print(RS)
         ReliableSets2[user] = RS
 
     lengths_of_Ris2 = []

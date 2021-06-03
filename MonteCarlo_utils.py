@@ -22,11 +22,15 @@ def find_path(graph, source, R):
     return R
 
 
-def Monte_carlo(T, graph, userid, prob_threshold=0):
-    # Create the users and puvis list here for speed when itereating later
-    edges_with_weights = [(user1, user2, puvi) for (user1, user2, puvi) in graph.edges.data('weight')]
+def Monte_Carlo(userid, T, dict_puvi, prob_threshold=0.0):
 
-    rnd_list = np.random.uniform(0, 1, size=((len(graph.edges.data('weight'))) * T,))
+    edges_with_weights = []
+    for user1 in dict_puvi.keys():
+        for user2 in dict_puvi[user1]:
+            edges_with_weights.append((user1, user2, dict_puvi[user1][user2]))
+
+
+    rnd_list = np.random.uniform(0, 1, size=((len(edges_with_weights)) * T,))
     i = 0
 
     c = defaultdict(lambda: 0)  # dictionary to store the counters for each userid
@@ -57,7 +61,7 @@ def Monte_carlo(T, graph, userid, prob_threshold=0):
     for v in c.keys():
         if c[v] >= prob_threshold:
             Ru.append(v)
-    return Ru
+    return (userid, Ru)
 
 
 
@@ -80,7 +84,7 @@ def run_MonteCarlo(supgraph, runs=100, threshold=0.001):  # runs: Monte Carlo tr
         # user = user[0]
         # print(user)
 
-        reliable_set = Monte_carlo(runs, supgraph, user, prob_threshold=runs * threshold)
+        reliable_set = Monte_Carlo(runs, supgraph, user, prob_threshold=runs * threshold)
         ReliableSets[user] = reliable_set
 
         # Print the process (count, time it took)
@@ -126,10 +130,11 @@ def visit_neighbors(graph, nodesList, R, NodesVisited):
     return R, to_visit_next
 
 
-# Suppose graph is a dictionary like the you created from trust
+
 def near_reachable_nodes(graph, source, max_path_length=4):
     """Create a list with all the nodes reachable from the source with a path
     of at most max_path_length edges"""
+    # Suppose graph is a dictionary like the you created from trust
     count = 0
     R = np.array([])
     nodesList = [source]
@@ -146,4 +151,3 @@ def near_reachable_nodes(graph, source, max_path_length=4):
         count += 1
 
     return R
-

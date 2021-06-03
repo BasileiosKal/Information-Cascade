@@ -89,6 +89,23 @@ def get_degree_distribution(graph):
     plot_pdf(out_degrees, axis_3, "out degree distribution", xlabel="out degree")
 
 
+def get_reliable_sets_stats(ReliableSets):
+    """Calculate some stats for the reliable sets"""
+    lengths_of_Ris2 = []
+    for RI in ReliableSets.values():
+        lengths_of_Ris2.append(len(RI))
+
+    print("Reliable sets stats:")
+    print("----------------------------------------------------")
+    print("Number of reliable sets: ", len(ReliableSets.values()))
+    print("Average size: ", (sum(lengths_of_Ris2)) / len(lengths_of_Ris2))
+    print("Max size", max(lengths_of_Ris2))
+    print("Number of reliable sets of size>10: ", len([RS for RS in lengths_of_Ris2 if RS > 10]))
+    print("Number of reliable sets of size>20: ", len([RS for RS in lengths_of_Ris2 if RS > 20]))
+    print("Number of reliable sets of size>50: ", len([RS for RS in lengths_of_Ris2 if RS > 50]))
+    print("----------------------------------------------------")
+
+
 if __name__ == "__main__":
     SGdb = sqlite3.connect('C:/Users/gauss/Downloads/SG_2.db', uri=True)
     table_of_category = "SG_1"   # Table corresponding to the category we will create a graph for
