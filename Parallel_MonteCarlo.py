@@ -6,7 +6,7 @@ import multiprocessing as mp
 
 
 
-def Monte_carlo_parallel_apply(userid, T, dict_puvi, dict_subgraph, prob_threshold, max_distance):
+def maxPath_MonteCarlo(userid, T, dict_puvi, dict_subgraph, prob_threshold, max_distance):
     """Helping Function to run monte carlo simulations in parallel using the pool.apply function"""
 
     # calculate the surrounding graph of the userid
