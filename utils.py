@@ -106,6 +106,27 @@ def get_reliable_sets_stats(ReliableSets):
     print("----------------------------------------------------")
 
 
+
+def saveTo_db(db_path, reliable_sets, category):
+    # "C:/Users/gauss/Documents/Cs Master/Projects/Social Networks/PyCharm Project/RS_1v1.db"
+    RSdb = sqlite3.connect(db_path, uri=True)
+
+    try:
+        RSdb.execute("create table RS_{}(uid, vid)".format(category))
+        print("Table RS_{} Created".format(category))
+    except:
+        print("RS_{} Exists".format(category))
+
+    for uid in reliable_sets.keys():
+        for vid in reliable_sets[uid]:
+            tr_ins = "insert into RS_{}(uid, vid) values('{}', '{}')".format(category, uid, vid)
+            RSdb.execute(tr_ins)
+
+    RSdb.commit()
+    RSdb.close()
+
+
+
 if __name__ == "__main__":
     SGdb = sqlite3.connect('C:/Users/gauss/Downloads/SG_2.db', uri=True)
     table_of_category = "SG_1"   # Table corresponding to the category we will create a graph for

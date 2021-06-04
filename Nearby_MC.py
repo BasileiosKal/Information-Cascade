@@ -105,16 +105,4 @@ if __name__ == "__main__":
         RS = res[1]
         ReliableSets2[user] = RS
 
-    lengths_of_Ris2 = []
-    for RI in ReliableSets2.values():
-        lengths_of_Ris2.append(len(RI))
-
-    print("Reliable sets stats:")
-    print("----------------------------------------------------")
-    print("Number of reliable sets: ", len(ReliableSets2.values()))
-    print("Average size: ", (sum(lengths_of_Ris2)) / len(lengths_of_Ris2))
-    print("Max size", max(lengths_of_Ris2))
-    print("Number of reliable sets of size>10: ", len([RS for RS in lengths_of_Ris2 if RS > 10]))
-    print("Number of reliable sets of size>20: ", len([RS for RS in lengths_of_Ris2 if RS > 20]))
-    print("Number of reliable sets of size>50: ", len([RS for RS in lengths_of_Ris2 if RS > 50]))
-    print("----------------------------------------------------")
+    get_reliable_sets_stats(ReliableSets2)

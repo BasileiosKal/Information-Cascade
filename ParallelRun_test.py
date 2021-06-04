@@ -4,18 +4,21 @@ import multiprocessing as mp
 import sqlite3
 import time
 import datetime
-
+from tqdm import tqdm
 
 
 if __name__ == "__main__":
     CATEGORY_TABLE = "SG_2"  # Table corresponding to the category we will create a graph for
-    RUNS = 10
+    RUNS = 1000
     THRESHOLD = 0.01
     SUBGRAPH_SIZE = 10000
 
+    pbar = tqdm(total=10)
     def collect_result(result):
         global results
+        global pbar
         results.append(result)
+        pbar.update()
 
     # ====================================================================================================== #
     # Create the graphs
@@ -56,8 +59,9 @@ if __name__ == "__main__":
     # results = [pool.apply(Monte_carlo_parallel_apply, args = (user, runs, edges_weights, runs*threshold)) for user in users_in_graph]
 
     # -----> Using apply async
-    # for user in users_in_graph:
-    #     pool.apply_async(Monte_carlo_parallel_apply, args=(user, runs, edges_weights, runs * threshold), callback = collect_result)
+    results = []
+    for user in users_in_graph:
+        pool.apply_async(Monte_Carlo, args=(user, RUNS, dict_puvi, RUNS*THRESHOLD), callback = collect_result)
 
     # -----> Using map
     # pool.map_async(Monte_carlo_parallel_map, [user for user in users_in_graph], callback=collect_result)
@@ -65,10 +69,10 @@ if __name__ == "__main__":
     # results = pool.map_async(Monte_carlo_Map_parallel, [user for user in users_in_graph]).get()
 
     # -----> Using starmap_async
-    results = pool.starmap_async(Monte_Carlo, [(user, RUNS, dict_puvi, RUNS*THRESHOLD) for user in users_in_graph]).get()
+    # results = pool.starmap_async(Monte_Carlo, [(user, RUNS, dict_puvi, RUNS*THRESHOLD) for user in users_in_graph]).get()
 
     pool.close()
-    # pool.join()
+    pool.join()
 
     end_time = time.time()
 
@@ -97,4 +101,3 @@ if __name__ == "__main__":
         ReliableSets2[user] = RS
 
     get_reliable_sets_stats(ReliableSets2)
-
