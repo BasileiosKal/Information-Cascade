@@ -20,7 +20,7 @@ def plot_pdf(probs_list, ax_obj, title, xlabel='', ylabel='Number of users'):
 
 
 def get_graph(table_of_categorie, SGdb):
-    """"Create the Graph of users for a category"""""
+    """Create the Graph of users for a category"""
     MainGraph = nx.DiGraph()   # The networkx graph
     graph_from_db = SGdb.execute("select * from "+table_of_categorie)  # Get the saved data from the db
     # cast puvi to float
@@ -38,8 +38,8 @@ def get_graph(table_of_categorie, SGdb):
 
 
 def get_supgraph2(MainGraph, supgraph_size=1000):
-    """"Choose the <supgraph_size> nodes with the highest out degrees
-    as the subgraph"""""
+    """Choose the <supgraph_size> nodes with the highest out degrees
+    as the subgraph"""
 
     # calculate and sort the degrees of the users
     nodes_degree_list = [(node, degree) for node, degree in MainGraph.out_degree()]
@@ -59,6 +59,9 @@ def get_supgraph2(MainGraph, supgraph_size=1000):
 
 
 def get_degree_distribution(graph):
+    """Return the in degree, out degree and total degree distributions
+    of a graph"""
+
     # Make the supgraph directed to calculate the
     # in and out degree
     directed_graph = nx.DiGraph()
@@ -108,7 +111,9 @@ def get_reliable_sets_stats(ReliableSets):
 
 
 def saveTo_db(db_path, reliable_sets, category):
-    # "C:/Users/gauss/Documents/Cs Master/Projects/Social Networks/PyCharm Project/RS_1v1.db"
+    """Save reliable sets to a sqlite3 database"""
+
+    #Directory used: "C:/Users/gauss/Documents/Cs Master/Projects/Social Networks/PyCharm Project/RS_1v1.db"
     RSdb = sqlite3.connect(db_path, uri=True)
 
     try:

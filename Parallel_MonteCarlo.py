@@ -5,23 +5,20 @@ import numpy as np
 
 
 def maxPath_MonteCarlo(userid, T, dict_puvi, dict_subgraph, prob_threshold, max_distance):
-    """Helping Function to run monte carlo simulations in parallel using the pool.apply function"""
+    """Function to run monte carlo simulations in parallel (using the pool.apply function)
+    on the nodes close to the source user"""
 
     # calculate the surrounding graph of the userid
     # the nodes close to the source_user
     visited = near_reachable_nodes(dict_subgraph, userid, max_path_length=max_distance)
-    # Create the subgraph with the nodes close the the source_user
-    # users_subgraph = supgraph.subgraph(visited)
-    # Get the edges and the weights (probabilities of influence: "puvi")
 
+    # Get the edges and the weights (probabilities of influence: "puvi")
     edges_with_weights = []
     for user1 in visited:
         for user2 in dict_puvi[user1]:
             if user2 in visited:
                 edges_with_weights.append((user1, user2, dict_puvi[user1][user2]))
 
-
-    # edges_with_weights = surrounding_graph[userid]
 
     # Create the random numbers list here for speed when iterating later
     rnd_list = np.random.uniform(0, 1, size=((len(edges_with_weights)) * T,))

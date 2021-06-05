@@ -3,7 +3,7 @@ import time
 import numpy as np
 
 
-# Suppose graph is a dictionary like the you created from trust
+
 def reachable_set(graph, source):
     R = []
     R = find_path(graph, source, R)
@@ -11,7 +11,6 @@ def reachable_set(graph, source):
 
 
 def find_path(graph, source, R):
-    # print(graph)
     R.append(source)
     if source not in graph.keys():  # Use graph.nodes if graph uses networkx
         return R
@@ -23,7 +22,8 @@ def find_path(graph, source, R):
 
 
 def Monte_Carlo(userid, T, dict_puvi, prob_threshold=0.0):
-
+    """Run <T> Monte Carlo simulations, from the source node <userid>, in the whole
+    graph defined by <dict_puvi>"""
     edges_with_weights = []
     for user1 in dict_puvi.keys():
         for user2 in dict_puvi[user1]:
@@ -62,55 +62,6 @@ def Monte_Carlo(userid, T, dict_puvi, prob_threshold=0.0):
         if c[v] >= prob_threshold:
             Ru.append(v)
     return (userid, Ru)
-
-
-
-def run_MonteCarlo(supgraph, runs=100, threshold=0.001):  # runs: Monte Carlo trials
-    # graph = "SG_3"
-    # users_in_graph = SGdb.execute("select distinct uid from "+graph)
-
-    ReliableSets = {}
-
-    # Create users list here for faster iteration later
-    users_in_graph = [uid for uid in supgraph.nodes]
-
-    start_time = time.time()  # To count the total time
-    per_process_start_time = time.time()  # to count the time for 10 itterations
-
-    progress_count = 0
-
-    print("Progress (time): ", end=',')
-    for user in users_in_graph:
-        # user = user[0]
-        # print(user)
-
-        reliable_set = Monte_Carlo(runs, supgraph, user, prob_threshold=runs * threshold)
-        ReliableSets[user] = reliable_set
-
-        # Print the process (count, time it took)
-        if progress_count % 10 == 0:
-            per_process_end_time = time.time()
-            print(
-                "{count} ({time:.2f})".format(count=progress_count, time=per_process_end_time - per_process_start_time),
-                end=" ")
-            per_process_start_time = time.time()
-
-        progress_count += 1
-
-    end_time = time.time()
-
-    print()
-    print("Done")
-    print("===================================")
-    print("Runing Time: ", end_time - start_time)
-
-    time_in_min = end_time - start_time
-    time_in_min = time_in_min / 60
-
-    print("Required time in min: ", time_in_min)
-    print("Required time in hours: ", time_in_min / 60)
-
-    return ReliableSets
 
 
 

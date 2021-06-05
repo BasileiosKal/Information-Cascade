@@ -8,13 +8,12 @@ from tqdm import tqdm
 
 
 if __name__ == "__main__":
-    CATEGORY_TABLE = "SG_2"  # Table corresponding to the category we will create a graph for
-    RUNS = 1000   # Monte Carlo simulations
-    THRESHOLD = 0.01   # Threshold of Monte Carlo algorithm
+    CATEGORY_TABLE = "SG_2"    # Table corresponding to the category we will create a graph for
+    RUNS = 1000                # Monte Carlo simulations
+    THRESHOLD = 0.01           # Threshold of Monte Carlo algorithm
     SUBGRAPH_SIZE = 10000
-    # The maximum distance from the source node that a user can be and be considered to be in the
-    # source nodes reachable set.
-    MAX_PATH_LENGTH = 10
+    MAX_PATH_LENGTH = 10       # The maximum distance from the source node that a user can be and be
+                               #  considered to be in the source nodes reachable set.
 
     pbar = tqdm(total=10)
     def collect_result(result):
@@ -43,7 +42,6 @@ if __name__ == "__main__":
     # Run Monte Carlo
     # ====================================================================================================== #
     print("Starting at: ", datetime.datetime.now())
-    # start_time = time.time()  # To count the total time
 
     # ************************************************************** #
     # Transfer the Graph from Networkx to dictionaries to be passed
@@ -55,6 +53,7 @@ if __name__ == "__main__":
     for node in users_in_graph:
         dict_subgraph[node] = list(supgraph.neighbors(node))
 
+    # puvi (nested) dictionary.
     dict_puvi = {}
     for user1 in users_in_graph:
         dict_puvi[user1] = {}
